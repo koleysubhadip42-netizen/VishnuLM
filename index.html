@@ -29,8 +29,8 @@
 
     <div class="p-4 bg-white border-t">
         <div class="max-w-4xl mx-auto flex gap-2">
-            <input type="text" id="input-field" class="flex-1 border border-gray-300 rounded-full px-5 py-3 outline-none" placeholder="Ask about DSA...">
-            <button onclick="askAI()" id="send-btn" class="bg-blue-600 text-white p-3 rounded-full hover:bg-blue-700">
+            <input type="text" id="input-field" class="flex-1 border border-gray-300 rounded-full px-5 py-3 outline-none" placeholder="Ask about DSA (e.g. What is Stack?)...">
+            <button onclick="askAI()" id="send-btn" class="bg-blue-600 text-white p-3 rounded-full hover:bg-blue-700 transition-all active:scale-95">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
                 </svg>
@@ -39,11 +39,11 @@
     </div>
 
     <script>
-        // API KEY থেকে সব স্পেস সরিয়ে দেওয়া হয়েছে
+        // API KEY থেকে স্পেস ট্রিম করা হয়েছে এবং দ্রুততম ফ্রি মডেল দেওয়া হয়েছে
         const API_KEY = "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".trim(); 
         const MODEL_ID = "google/gemini-2.0-flash-lite-preview-02-05:free"; 
         
-        const SYSTEM_DATA = "Role: DSA Expert. Answer only DSA questions. Dataset: Arrays, Linked Lists, Stacks, Queues, Trees, Graphs, Sorting, Searching.";
+        const SYSTEM_DATA = "Role: DSA Expert. Answer only DSA related questions based on Arrays, Stacks, Queues, and Algorithms.";
 
         async function askAI() {
             const input = document.getElementById('input-field');
@@ -65,7 +65,8 @@
                     method: "POST",
                     headers: {
                         "Authorization": "Bearer " + API_KEY,
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "HTTP-Referer": window.location.origin
                     },
                     body: JSON.stringify({
                         model: MODEL_ID,
@@ -83,10 +84,11 @@
                     const reply = result.choices[0].message.content;
                     box.innerHTML += `<div class="bot-msg message-bubble shadow-sm">${reply}</div>`;
                 } else {
-                    box.innerHTML += `<div class="bot-msg message-bubble shadow-sm">Error: ${result.error?.message || "Invalid Key"}</div>`;
+                    box.innerHTML += `<div class="bot-msg message-bubble shadow-sm text-red-500">Error: Please check your OpenRouter API Key balance or limits.</div>`;
                 }
             } catch (err) {
-                loader.innerText = "Connection Error!";
+                loader.innerText = "Connection Error! Check internet.";
+                console.error(err);
             }
             box.scrollTop = box.scrollHeight;
         }
