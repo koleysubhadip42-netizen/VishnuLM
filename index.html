@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DSA Expert AI - Llama Version</title>
+    <title>DSA Expert AI - Hackathon</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .message-bubble { max-width: 85%; padding: 12px 16px; border-radius: 18px; line-height: 1.5; font-size: 15px; }
@@ -18,19 +18,22 @@
 
     <nav class="bg-white border-b px-4 py-3 flex justify-between items-center shadow-sm">
         <span class="text-xl font-bold text-gray-800">Universal <span class="text-blue-600">AI</span></span>
-        <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">LIVE: LLAMA EXPERT</span>
+        <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">LIVE: DSA EXPERT</span>
     </nav>
 
     <div id="chat-box" class="flex-1 overflow-y-auto p-4 gap-4">
         <div class="bot-msg message-bubble">
-            Hello! I am your DSA Expert assistant powered by Llama. Ask me anything!
+            Hello! I am your DSA Expert assistant. Ask me anything about Data Structures!
         </div>
     </div>
 
     <div class="p-4 bg-white border-t">
         <div class="max-w-4xl mx-auto flex gap-2">
-            <input type="text" id="input-field" class="flex-1 border border-gray-300 rounded-full px-5 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="Type about DSA...">
-            <button onclick="askAI()" id="send-btn" class="bg-blue-600 text-white p-3 rounded-full hover:bg-blue-700 transition-all">
+            <input type="text" id="input-field" 
+                class="flex-1 border border-gray-300 rounded-full px-5 py-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all" 
+                placeholder="Type your DSA question...">
+            <button onclick="askAI()" id="send-btn" 
+                class="bg-blue-600 text-white p-3 rounded-full hover:bg-blue-700 transition-transform active:scale-95 shadow-md">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
                 </svg>
@@ -40,30 +43,36 @@
 
     <script>
         // ================= CONFIGURATION =================
-        const API_KEY = "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"; 
-        const MODEL_ID = "meta-llama/llama-3.3-70b-instruct:free"; 
+        const API_KEY = "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"; 
+        const MODEL_ID = "openai/gpt-oss-120b:free"; 
         
-        // Eikhane apnar Dataset ache
-        const SYSTEM_DATA = `Role: You are a DSA Expert Assistant for a Hackathon project.
-            1. Arrays: Fixed size, O(1) access.
-            2. Linked Lists: Nodes with pointers, O(1) insertion.
+        const SYSTEM_DATA = `
+            Role: You are a DSA Expert Assistant for a Hackathon project.
+            
+            1. Arrays: Fixed size, Contiguous memory, Access O(1).
+            2. Linked Lists: Nodes with pointers, Insertion O(1).
             3. Stacks: LIFO (Last In First Out).
             4. Queues: FIFO (First In First Out).
-            5. Trees: BST search time O(log n).
-            6. Sorting: Merge Sort O(n log n).
-            If anyone asks a question outside DSA, politely say you are a DSA specialized bot.`;
+            5. Sorting: Merge/Quick Sort O(n log n).
+            6. Searching: Binary Search O(log n).
+            
+            If any question is asked outside DSA, politely say you are a DSA specialized bot.
+        `;
         // =================================================
 
         async function askAI() {
             const input = document.getElementById('input-field');
             const box = document.getElementById('chat-box');
             const query = input.value.trim();
+
             if (!query) return;
 
+            // Display User Message
             box.innerHTML += `<div class="user-msg message-bubble shadow-sm">${query}</div>`;
             input.value = "";
             box.scrollTop = box.scrollHeight;
 
+            // Loading Indicator
             const loader = document.createElement('div');
             loader.className = 'bot-msg message-bubble dot-pulse';
             loader.innerText = 'AI is thinking...';
@@ -92,13 +101,16 @@
                 if (result.choices && result.choices[0]) {
                     const reply = result.choices[0].message.content;
                     box.innerHTML += `<div class="bot-msg message-bubble shadow-sm">${reply}</div>`;
+                } else if (result.error) {
+                    throw new Error(result.error.message);
                 } else {
-                    box.innerHTML += `<div class="bot-msg message-bubble shadow-sm text-red-500">Error: Check your API Key or Limits.</div>`;
+                    throw new Error("Invalid response from API");
                 }
 
             } catch (err) {
-                loader.innerText = "Error connecting to AI!";
-                console.error(err);
+                loader.innerText = "Error: " + err.message;
+                loader.classList.remove('dot-pulse');
+                console.error("API Error:", err);
             }
             box.scrollTop = box.scrollHeight;
         }
